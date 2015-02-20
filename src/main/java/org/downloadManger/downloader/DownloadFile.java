@@ -88,23 +88,7 @@ public class DownloadFile extends Thread {
 					}
 				}
 			};
-			// <dependency>
-			// <groupId>com.github.axet</groupId>
-			// <artifactId>wget</artifactId>
-			// <version>1.2.12</version>
-			// <scope>compile</scope>
-			// </dependency>
-			
-//			<plugin>
-//	        <artifactId>maven-compiler-plugin</artifactId>
-//	        <version>2.3.2</version>
-//	        <configuration>
-//	          <source>1.6</source>
-//	          <target>1.6</target>
-//	          <encoding>UTF-8</encoding>
-//	        </configuration>
-//	      </plugin>
-			
+
 			// choise file
 			URL url = link;
 			// initialize url information object
@@ -117,8 +101,8 @@ public class DownloadFile extends Thread {
 			File target = savedFilePath;
 			// create wget downloader
 			WGet w = new WGet(info, target);
-			w.updateDirectboolSize(250);
 			// will blocks until download finishes
+			w.updateDirectboolSize(7);
 			w.download(stop, notify);
 		} catch (DownloadMultipartError e) {
 			for (Part p : e.getInfo().getParts()) {
@@ -137,12 +121,3 @@ public class DownloadFile extends Thread {
 	}
 
 }
-/*
- * InputStream in = new BufferedInputStream(link.openStream());
- * ByteArrayOutputStream out = new ByteArrayOutputStream(); byte[] buf = new
- * byte[1024]; int n = 0; while (-1 != (n = in.read(buf))) { out.write(buf, 0,
- * n); } out.close(); in.close(); byte[] response = out.toByteArray();
- * 
- * FileOutputStream fos = new FileOutputStream(savedFilePath);
- * fos.write(response); fos.close(); // End download code return true;
- */
