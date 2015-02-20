@@ -88,7 +88,23 @@ public class DownloadFile extends Thread {
 					}
 				}
 			};
-
+			// <dependency>
+			// <groupId>com.github.axet</groupId>
+			// <artifactId>wget</artifactId>
+			// <version>1.2.12</version>
+			// <scope>compile</scope>
+			// </dependency>
+			
+//			<plugin>
+//	        <artifactId>maven-compiler-plugin</artifactId>
+//	        <version>2.3.2</version>
+//	        <configuration>
+//	          <source>1.6</source>
+//	          <target>1.6</target>
+//	          <encoding>UTF-8</encoding>
+//	        </configuration>
+//	      </plugin>
+			
 			// choise file
 			URL url = link;
 			// initialize url information object
