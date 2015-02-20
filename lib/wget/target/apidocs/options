@@ -1,0 +1,24 @@
+-classpath
+'/home/sngv/APP/workspace/wget/target/classes:/home/sngv/.m2/repository/commons-logging/commons-logging/1.1.1/commons-logging-1.1.1.jar:/home/sngv/.m2/repository/com/thoughtworks/xstream/xstream/1.4.2/xstream-1.4.2.jar:/home/sngv/.m2/repository/org/apache/commons/commons-lang3/3.1/commons-lang3-3.1.jar:/home/sngv/.m2/repository/commons-io/commons-io/2.1/commons-io-2.1.jar:/home/sngv/.m2/repository/com/github/axet/threads/0.0.9/threads-0.0.9.jar:/home/sngv/.m2/repository/org/apache/httpcomponents/httpcore/4.1.4/httpcore-4.1.4.jar:/home/sngv/.m2/repository/commons-codec/commons-codec/1.4/commons-codec-1.4.jar:/home/sngv/.m2/repository/org/apache/httpcomponents/httpclient/4.1.3/httpclient-4.1.3.jar:/home/sngv/.m2/repository/xmlpull/xmlpull/1.1.3.1/xmlpull-1.1.3.1.jar:/home/sngv/.m2/repository/xpp3/xpp3_min/1.1.4c/xpp3_min-1.1.4c.jar'
+-encoding
+'UTF-8'
+-protected
+-sourcepath
+'/home/sngv/APP/workspace/wget/src/main/java'
+-author
+-bottom
+'Copyright &#169; 2015. All Rights Reserved.'
+-charset
+'UTF-8'
+-d
+'/home/sngv/APP/workspace/wget/target/apidocs'
+-docencoding
+'UTF-8'
+-doctitle
+'wget 1.2.12 API'
+-linkoffline
+'http://docs.oracle.com/javase/6/docs/api' '/home/sngv/APP/workspace/wget/target/javadoc-bundle-options'
+-use
+-version
+-windowtitle
+'wget 1.2.12 API'
