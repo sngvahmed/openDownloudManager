@@ -1,109 +1,64 @@
 package org.downloadManger.downloader;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.net.URL;
+import java.util.Vector;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.swing.JOptionPane;
-
+import org.downloadManger.gui.DownloadListNotifier;
 import org.springframework.stereotype.Component;
 
-import com.github.axet.wget.DirectMultipart;
 import com.github.axet.wget.WGet;
 import com.github.axet.wget.info.DownloadInfo;
 import com.github.axet.wget.info.DownloadInfo.Part;
-import com.github.axet.wget.info.DownloadInfo.Part.States;
 import com.github.axet.wget.info.ex.DownloadMultipartError;
 
 @Component("DownloadFile")
 public class DownloadFile extends Thread {
 
 	private File savedFilePath;
-	private URL link;
-	AtomicBoolean stop = new AtomicBoolean(false);
-	DownloadInfo info;
-	long last;
+	private AtomicBoolean stop = new AtomicBoolean(false);
+	private DownloadInfo info;
+	private int fileNumber;
+	private URL url;
 
 	public DownloadFile() {
 
 	}
 
-	public void setParams(File savedFilePath, URL link) {
-		this.link = link;
+	public DownloadFile(File savedFilePath, URL link, int fileNumber) {
 		this.savedFilePath = savedFilePath;
+		this.fileNumber = fileNumber;
+		this.url = link;
+		// initialize url information object
+		info = new DownloadInfo(link);
 	}
 
 	@Override
 	public void run() {
+		createDownloadListRow();
 		download();
+	}
+
+	private void createDownloadListRow() {
+		Vector<Object> rowData = new Vector<Object>();
+		rowData.add(savedFilePath.getName());
+		rowData.add("");
+		rowData.add("");
+		rowData.add("");
+		rowData.add("");
+		rowData.add("");
+		DownloadListNotifier.notifyNewDownloadRecord(rowData);
 	}
 
 	private boolean download() {
 
 		try {
-			Thread notify = new Thread() {
+			DownloadNotificationThread notify = new DownloadNotificationThread(
+					info, fileNumber);
 
-				@Override
-				public void run() {
-					// notify app or save download state
-					// you can extract information from DownloadInfo info;
-					switch (info.getState()) {
-					case EXTRACTING:
-					case EXTRACTING_DONE:
-					case DONE:
-						System.out.println(info.getState());
-						break;
-					case RETRYING:
-						System.out.println(info.getState() + " "
-								+ info.getDelay());
-						break;
-					case DOWNLOADING:
-						long now = System.currentTimeMillis();
-						if (now - 1000 > last) {
-							last = now;
+			downloadMultiPart(notify);
 
-							String parts = "";
-							for (Part p : info.getParts()) {
-								if (p.getState().equals(States.DOWNLOADING)) {
-									parts += String.format("Part#%d(%.2f) ",
-											p.getNumber(), p.getCount()
-													/ (float) p.getLength());
-								}
-							}
-
-							System.out.println(String.format("%.2f %s",
-									info.getCount() / (float) info.getLength(),
-									parts));
-						}
-						break;
-					default:
-						break;
-					}
-				}
-			};
-
-			// choise file
-			URL url = link;
-			// initialize url information object
-			info = new DownloadInfo(url);
-			// extract infromation from the web
-			info.extract(stop, notify);
-			// enable multipart donwload
-			info.enableMultipart();
-			// Choise target file
-			File target = savedFilePath;
-			// create wget downloader
-			WGet w = new WGet(info, target);
-			// will blocks until download finishes
-			w.updateDirectboolSize(7);
-			w.download(stop, notify);
 		} catch (DownloadMultipartError e) {
 			for (Part p : e.getInfo().getParts()) {
 				Throwable ee = p.getException();
@@ -112,12 +67,30 @@ public class DownloadFile extends Thread {
 			}
 			return false;
 		} catch (RuntimeException e) {
-			return false;
+			System.out.println(e.getMessage());
+			return true;
 		} catch (Exception e) {
+			System.out.println(e.getMessage());
 			return false;
 		}
 		return true;
 
 	}
 
+	private void downloadMultiPart(DownloadNotificationThread notify) {
+		// extract infromation from the web
+		info.extract(stop, notify);
+		// enable multipart donwload
+		info.enableMultipart();
+
+		DownloadListNotifier.notifyFileSize(info.getLength(), fileNumber);
+
+		// Choise target file
+		File target = savedFilePath;
+		// create wget downloader
+		WGet w = new WGet(info, target);
+		// will blocks until download finishes
+		w.updateDirectboolSize(7);
+		w.download(stop, notify);
+	}
 }

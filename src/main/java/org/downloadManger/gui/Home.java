@@ -2,7 +2,6 @@ package org.downloadManger.gui;
 
 import java.awt.Color;
 import java.awt.Dimension;
-
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -10,36 +9,41 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.DefaultTableModel;
 
 import org.downloadManger.downloader.DownloadFile;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component("Home")
 public class Home extends JFrame {
 
-
 	private static final long serialVersionUID = 1L;
 	private JPanel window;
 	private JTextField url;
 	private JButton download;
-	@Autowired
-	DownloadFile downloadFile;
+	public static JTable table;
+	public static DefaultTableModel tableModel;
+
+	String[] columnNames = { "File name", "Size", "Status", "Time left",
+			"Transfare rate", "progress", "Downloaded" };
 
 	public Home() {
 		configureMenuBar(this);
@@ -52,8 +56,9 @@ public class Home extends JFrame {
 				// TODO Auto-generated method stub
 				try {
 					URL actualUrl = new URL(url.getText());
-
-					downloadFile.setParams(new File("VirtualBox-4.2.4-81684-OSX.dmg"), actualUrl);
+					DownloadFile downloadFile = new DownloadFile(new File(
+							"VirtualBox-4.2.4-81684-OSX.dmg"), actualUrl,
+							tableModel.getRowCount());
 					downloadFile.start();
 
 				} catch (MalformedURLException e1) {
@@ -83,6 +88,42 @@ public class Home extends JFrame {
 		window.add(download);
 
 		setContentPane(window);
+
+		// list of downloads
+
+		constructDownloadList();
+
+	}
+
+	private void constructDownloadList() {
+
+		table = new JTable();
+		table.setRowHeight(25);
+		table.setPreferredScrollableViewportSize(new Dimension(500, 70));
+		table.setFillsViewportHeight(true);
+		table.setEnabled(false);
+		// Create the scroll pane and add the table to it.
+		JScrollPane scrollPane = new JScrollPane(table);
+		scrollPane.setBounds(20, 100, 860, 300);
+		// Add the scroll pane to this panel.
+		window.add(scrollPane);
+
+		tableModel = (DefaultTableModel) table.getModel();
+
+		tableModel.setColumnIdentifiers(columnNames);
+		
+		centerTableCells();
+
+		tableModel.fireTableDataChanged();
+
+	}
+
+	private void centerTableCells() {
+		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+		centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+		for (int i = 0; i < columnNames.length; i++)
+			Home.table.getColumnModel().getColumn(i)
+					.setCellRenderer(centerRenderer);
 	}
 
 	private void configurFrame() {
