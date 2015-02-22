@@ -1,2 +1,0 @@
-mvn install:install-file -Dfile=/home/sngv/WorkSpace/ODM/wGet_ODM/target/wget-1.2.12.jar -DgroupId=com.github.axet  -DartifactId=wget -Dversion=1.2.12 -Dpackaging=jar
-
