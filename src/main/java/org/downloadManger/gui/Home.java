@@ -29,6 +29,7 @@ import javax.swing.KeyStroke;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
+import org.apache.commons.io.FilenameUtils;
 import org.downloadManger.downloader.DownloadFile;
 import org.springframework.stereotype.Component;
 
@@ -56,8 +57,10 @@ public class Home extends JFrame {
 				// TODO Auto-generated method stub
 				try {
 					URL actualUrl = new URL(url.getText());
-					DownloadFile downloadFile = new DownloadFile(new File(
-							"VirtualBox-4.2.4-81684-OSX.dmg"), actualUrl,
+                    String fileName = FilenameUtils.getBaseName(actualUrl.toString()) ;
+                    String extension = FilenameUtils.getExtension(actualUrl.toString());
+                    System.out.println(actualUrl.getUserInfo());
+					DownloadFile downloadFile = new DownloadFile(new File(fileName + "." + extension), actualUrl,
 							tableModel.getRowCount());
 					downloadFile.start();
 
