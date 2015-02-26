@@ -129,9 +129,9 @@ public class DownloadFile extends Thread {
 	}
 
 	private void downloadSinglePart(DownloadNotificationThread notify) {
-
+		
 		URL url = this.url;
-		File target = new File("download/file");
+		File target = savedFilePath;
 		WGet w = new WGet(url, target);
 		info = w.getInfo();
 		notify.setInfo(info);

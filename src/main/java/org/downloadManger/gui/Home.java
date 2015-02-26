@@ -12,25 +12,12 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import javax.swing.ButtonGroup;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JRadioButtonMenuItem;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.KeyStroke;
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
+import org.apache.commons.io.FilenameUtils;
 import org.downloadManger.downloader.DownloadFile;
 import org.springframework.stereotype.Component;
 
@@ -46,7 +33,7 @@ public class Home extends JFrame {
 	private JButton download;
 	public static JTable table;
 	public static DefaultTableModel tableModel;
-
+    public JFileChooser fileChooser;
 	String[] columnNames = { "File name", "Size", "Status", "Time left",
 			"Transfare rate", "progress", "Downloaded" };
 
@@ -60,13 +47,35 @@ public class Home extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				// TODO Auto-generated method stub
 				try {
-					URL actualUrl = new URL(url.getText());
-					
-					DownloadFile downloadFile = new DownloadFile(new File(
-							"VirtualBox-4.2.4-81684-OSX.dmg"), actualUrl,
-							tableModel.getRowCount());
-					downloadFile.start();
 
+					
+
+					fileChooser = new JFileChooser();
+
+					URL actualUrl = new URL(url.getText());
+
+                    String fileName = FilenameUtils.getBaseName(actualUrl.getFile()) ;
+//                    String extension = FilenameUtils.getExtension(actualUrl.toString());
+//
+//                    FileNameExtensionFilter filter = new FileNameExtensionFilter(extension, extension);
+//
+//                    System.out.println(fileName + " " + extension );
+//
+//                    fileChooser.setFileFilter(filter);
+                    fileChooser.setSelectedFile(new File(fileName));
+
+                    int fileChecker = fileChooser.showSaveDialog(Home.this);
+
+                    if(fileChecker == JFileChooser.APPROVE_OPTION){
+
+                        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
+                        DownloadFile downloadFile = new DownloadFile(fileChooser.getSelectedFile(), actualUrl,
+                                tableModel.getRowCount());
+                        downloadFile.start();
+                    }else {
+                        System.out.println("Fialed to load File");
+                    }
 				} catch (MalformedURLException e1) {
 					Uiutills.showDialog("Invalid url", Message.URL_ERROR,
 							JOptionPane.ERROR_MESSAGE);
