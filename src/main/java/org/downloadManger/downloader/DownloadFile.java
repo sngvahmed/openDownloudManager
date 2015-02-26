@@ -1,12 +1,20 @@
 package org.downloadManger.downloader;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.swing.JOptionPane;
+
 import org.downloadManger.gui.DownloadListNotifier;
 import org.springframework.stereotype.Component;
+
+import utills.Message;
+import utills.Uiutills;
 
 import com.github.axet.wget.WGet;
 import com.github.axet.wget.info.DownloadInfo;
@@ -36,8 +44,52 @@ public class DownloadFile extends Thread {
 
 	@Override
 	public void run() {
+
+		if (!isValidUrl()) {
+			Uiutills.showDialog("Invalid url", Message.URL_ERROR,
+					JOptionPane.ERROR_MESSAGE);
+			return;
+		}
 		createDownloadListRow();
 		download();
+		// invoke this method because of time delay in notify thread
+		// purpose : because it did not update the value in list after dwonload
+		// finish
+		notifyListwithEndOfDownload();
+	}
+
+	private boolean isValidUrl() {
+		// check if url is exist
+		HttpURLConnection con;
+		try {
+			con = (HttpURLConnection) url.openConnection();
+
+			con.setRequestMethod("HEAD");
+			System.out.println(con.getContentType());
+			if (con.getContentType() == null
+					|| con.getResponseCode() != HttpURLConnection.HTTP_OK
+					|| con.getContentType().indexOf("text/html") != -1) {
+				throw new MalformedURLException();
+			}
+		} catch (IOException e) {
+			return false;
+		}
+		return true;
+	}
+
+	private void notifyListwithEndOfDownload() {
+		DownloadListNotifier.notifyProgress(
+				DownloadInfoCalculator.calcProgress(1, 1), fileNumber);
+		DownloadListNotifier.notifyTranfareRate(
+				DownloadInfoCalculator.calcTransfareRate(0, 0), fileNumber);
+		DownloadListNotifier.notifyTimeLeft(
+				DownloadInfoCalculator.calcTimeLeft(1, 1, 0), fileNumber);
+		if (info.getLength() == null) {
+			DownloadListNotifier.notifyDownloaded(-1, fileNumber);
+		} else
+			DownloadListNotifier
+					.notifyDownloaded(DownloadInfoCalculator
+							.calcDownloadedSize(info.getLength()), fileNumber);
 	}
 
 	private void createDownloadListRow() {
@@ -51,30 +103,42 @@ public class DownloadFile extends Thread {
 		DownloadListNotifier.notifyNewDownloadRecord(rowData);
 	}
 
-	private boolean download() {
+	private void download() {
 
 		try {
 			DownloadNotificationThread notify = new DownloadNotificationThread(
 					info, fileNumber);
-
-			downloadMultiPart(notify);
+			if (info.multipart())
+				downloadMultiPart(notify);
+			else
+				downloadSinglePart(notify);
 
 		} catch (DownloadMultipartError e) {
-			for (Part p : e.getInfo().getParts()) {
-				Throwable ee = p.getException();
-				if (ee != null)
-					ee.printStackTrace();
-			}
-			return false;
+			Message m = null;
+			m.setMessage(e.getMessage());
+			Uiutills.showDialog("Error", m, JOptionPane.ERROR_MESSAGE);
 		} catch (RuntimeException e) {
-			System.out.println(e.getMessage());
-			return true;
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-			return false;
+			Message m = null;
+			m.setMessage(e.getMessage());
+			Uiutills.showDialog("Error", m, JOptionPane.ERROR_MESSAGE);		} catch (Exception e) {
+			Message m = null;
+			m.setMessage(e.getMessage());
+			Uiutills.showDialog("Error", m, JOptionPane.ERROR_MESSAGE);
 		}
-		return true;
 
+	}
+
+	private void downloadSinglePart(DownloadNotificationThread notify) {
+
+		URL url = this.url;
+		File target = new File("download/file");
+		WGet w = new WGet(url, target);
+		info = w.getInfo();
+		notify.setInfo(info);
+		DownloadListNotifier.notifyFileSize(
+				DownloadInfoCalculator.calcFileSize(info.getLength()),
+				fileNumber);
+		w.download(stop, notify);
 	}
 
 	private void downloadMultiPart(DownloadNotificationThread notify) {
@@ -83,13 +147,13 @@ public class DownloadFile extends Thread {
 		// enable multipart donwload
 		info.enableMultipart();
 
-		DownloadListNotifier.notifyFileSize(info.getLength(), fileNumber);
-
+		DownloadListNotifier.notifyFileSize(
+				DownloadInfoCalculator.calcFileSize(info.getLength()),
+				fileNumber);
 		// Choise target file
 		File target = savedFilePath;
 		// create wget downloader
 		WGet w = new WGet(info, target);
-		// will blocks until download finishes
 		w.updateDirectboolSize(7);
 		w.download(stop, notify);
 	}

@@ -7,6 +7,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -32,6 +34,9 @@ import javax.swing.table.DefaultTableModel;
 import org.downloadManger.downloader.DownloadFile;
 import org.springframework.stereotype.Component;
 
+import utills.Message;
+import utills.Uiutills;
+
 @Component("Home")
 public class Home extends JFrame {
 
@@ -56,17 +61,15 @@ public class Home extends JFrame {
 				// TODO Auto-generated method stub
 				try {
 					URL actualUrl = new URL(url.getText());
+					
 					DownloadFile downloadFile = new DownloadFile(new File(
 							"VirtualBox-4.2.4-81684-OSX.dmg"), actualUrl,
 							tableModel.getRowCount());
 					downloadFile.start();
 
 				} catch (MalformedURLException e1) {
-					// TODO Auto-generated catch block
-					JOptionPane.showMessageDialog(null,
-							"An error occured while dowloading the file",
-							"Download error", JOptionPane.ERROR_MESSAGE);
-
+					Uiutills.showDialog("Invalid url", Message.URL_ERROR,
+							JOptionPane.ERROR_MESSAGE);
 				}
 			}
 		});
@@ -111,7 +114,7 @@ public class Home extends JFrame {
 		tableModel = (DefaultTableModel) table.getModel();
 
 		tableModel.setColumnIdentifiers(columnNames);
-		
+
 		centerTableCells();
 
 		tableModel.fireTableDataChanged();
