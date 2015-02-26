@@ -40,7 +40,6 @@ public class Home extends JFrame {
 		download.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
 				try {
                     fileChooser = new JFileChooser();
 
@@ -51,15 +50,12 @@ public class Home extends JFrame {
 
                     FileNameExtensionFilter filter = new FileNameExtensionFilter(extension, extension);
 
-                    System.out.println(fileName + " " + extension );
-
                     fileChooser.setFileFilter(filter);
                     fileChooser.setSelectedFile(new File(fileName));
 
                     int fileChecker = fileChooser.showSaveDialog(Home.this);
 
                     if(fileChecker == JFileChooser.APPROVE_OPTION){
-
                         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
                         DownloadFile downloadFile = new DownloadFile(fileChooser.getSelectedFile(), actualUrl,
