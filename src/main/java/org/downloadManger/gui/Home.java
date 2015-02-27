@@ -7,8 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.io.IOException;
-import java.net.HttpURLConnection;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 
@@ -18,6 +17,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 import org.apache.commons.io.FilenameUtils;
+import org.downloadManger.ActionListner.HomeActionListner;
 import org.downloadManger.downloader.DownloadFile;
 import org.springframework.stereotype.Component;
 
@@ -29,11 +29,11 @@ public class Home extends JFrame {
 
     private static final long serialVersionUID = 1L;
     private JPanel window;
-    private JTextField url;
     private JButton download;
+    private HomeActionListner homeActionListner;
     public static JTable table;
     public static DefaultTableModel tableModel;
-    public JFileChooser fileChooser;
+
     String[] columnNames = { "File name", "Size", "Status", "Time left",
             "Transfare rate", "progress", "Downloaded" };
 
@@ -41,40 +41,8 @@ public class Home extends JFrame {
         configureMenuBar(this);
         constructGui();
         configurFrame();
-
-        download.addActionListener(new ActionListener() {
-
-            public void actionPerformed(ActionEvent e) {
-                try {
-
-                    fileChooser = new JFileChooser();
-                    URL actualUrl = new URL(url.getText());
-
-                    String fileName = FilenameUtils.getBaseName(actualUrl.getFile()) ;
-                    String extension = FilenameUtils.getExtension(actualUrl.toString());
-
-                    FileNameExtensionFilter filter = new FileNameExtensionFilter(extension, extension);
-
-                    fileChooser.setFileFilter(filter);
-                    fileChooser.setSelectedFile(new File(fileName));
-
-                    int fileChecker = fileChooser.showSaveDialog(Home.this);
-
-                    if(fileChecker == JFileChooser.APPROVE_OPTION){
-                        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-                        DownloadFile downloadFile = new DownloadFile(fileChooser.getSelectedFile(), actualUrl,
-                                tableModel.getRowCount());
-                        downloadFile.start();
-                    }else {
-                        System.out.println("Fialed to load File");
-                    }
-                } catch (MalformedURLException e1) {
-                    Uiutills.showDialog("Invalid url", Message.URL_ERROR,
-                            JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        });
-
+        homeActionListner = new HomeActionListner(download);
+        download.addActionListener(homeActionListner);
     }
 
     private void constructGui() {
@@ -83,18 +51,11 @@ public class Home extends JFrame {
         window = new JPanel();
         window.setLayout(null);
 
-        url = new JTextField();
-        url.setBounds(20, 20, 700, 30);
-
         download = new JButton("Download");
-        download.setBounds(740, 20, 140, 30);
-        window.add(url);
+        download.setBounds(20, 20, 140, 50);
         window.add(download);
 
         setContentPane(window);
-
-        // list of downloads
-
         constructDownloadList();
 
     }
