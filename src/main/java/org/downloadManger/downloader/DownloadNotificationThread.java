@@ -17,6 +17,10 @@ public class DownloadNotificationThread extends Thread {
 		this.fileNumber = fileNumber;
 	}
 
+	public void setInfo(DownloadInfo info) {
+		this.info = info;
+	}
+
 	@Override
 	public void run() {
 		// notify app or save download state
@@ -33,27 +37,20 @@ public class DownloadNotificationThread extends Thread {
 			break;
 		case DOWNLOADING:
 			long now = System.currentTimeMillis();
-			if (now - 1000 > last) {
+			if (now - 500 > last) {
 				last = now;
 
-				String parts = "";
-				for (Part p : info.getParts()) {
-					if (p.getState().equals(States.DOWNLOADING)) {
-						parts += String.format("Part#%d(%.2f) ", p.getNumber(),
-								p.getCount() / (float) p.getLength());
-					}
-				}
-
-				System.out.println(String.format("%.2f %s", info.getCount()
-						/ (float) info.getLength(), parts));
-
-				DownloadListNotifier.notifyProgress(info.getCount(),
-						info.getLength(), fileNumber);
-				DownloadListNotifier.notifyTranfareRate(info.getCount(),
-						previouseBytes, fileNumber);
-				DownloadListNotifier.notifyTimeLeft(info.getCount(),
-						info.getLength(), previouseBytes, fileNumber);
-				DownloadListNotifier.notifyDownloaded(info.getCount(), fileNumber);
+				DownloadListNotifier.notifyProgress(DownloadInfoCalculator
+						.calcProgress(info.getCount(), info.getLength()),
+						fileNumber);
+				DownloadListNotifier.notifyTranfareRate(
+						DownloadInfoCalculator.calcTransfareRate(
+								info.getCount(), previouseBytes), fileNumber);
+				DownloadListNotifier.notifyTimeLeft(DownloadInfoCalculator
+						.calcTimeLeft(info.getCount(), info.getLength(),
+								previouseBytes), fileNumber);
+				DownloadListNotifier.notifyDownloaded(DownloadInfoCalculator
+						.calcDownloadedSize(info.getCount()), fileNumber);
 				previouseBytes = info.getCount();
 
 			}
