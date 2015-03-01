@@ -7,13 +7,26 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
-import java.io.IOException;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import javax.swing.*;
-import javax.swing.filechooser.FileNameExtensionFilter;
+import javax.swing.ButtonGroup;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButtonMenuItem;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
@@ -70,7 +83,10 @@ public class Home extends JFrame {
 
                         fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
-                        DownloadFile downloadFile = new DownloadFile(fileChooser.getSelectedFile(), actualUrl,
+                        ProgressFrame progressFrame = new ProgressFrame();
+                        ProgressFrameNotifier progressFrameNotifier = new ProgressFrameNotifier(progressFrame);
+                        
+                        DownloadFile downloadFile = new DownloadFile(progressFrameNotifier,fileChooser.getSelectedFile(), actualUrl,
                                 tableModel.getRowCount());
                         downloadFile.start();
                     }else {
