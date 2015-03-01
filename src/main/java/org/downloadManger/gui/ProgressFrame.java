@@ -1,24 +1,14 @@
 package org.downloadManger.gui;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Toolkit;
-import java.util.List;
-import java.util.Vector;
-
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableModel;
-
-import org.downloadManger.downloader.DownloadInfoCalculator;
-
 import com.github.axet.wget.info.DownloadInfo.Part;
 import com.github.axet.wget.info.DownloadInfo.Part.States;
+import org.downloadManger.downloader.DownloadInfoCalculator;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.util.List;
+import java.util.Vector;
 
 public class ProgressFrame extends JFrame {
 
@@ -32,6 +22,7 @@ public class ProgressFrame extends JFrame {
 	private JButton cancel = new JButton("Cancel");
 	private JButton pause = new JButton("Pause");
 	private JLabel urlLable;
+    private String url;
 	private String[] downloadInformation = { "Status", "File size",
 			"Downloaded", "Transfare rate", "Time left", "Resume capability" };
 	String[] columnNames = { "N.", "Downloaded", "Info" };
@@ -39,6 +30,7 @@ public class ProgressFrame extends JFrame {
 	public ProgressFrame() {
 		constructGui();
 		configurFrame();
+        configureUrlLable();
 	}
 
 	private void constructGui() {
@@ -46,8 +38,6 @@ public class ProgressFrame extends JFrame {
 
 		window = new JPanel();
 		window.setLayout(null);
-
-		configureUrlLable();
 
 		configureDownloadStatusTable();
 
@@ -87,8 +77,7 @@ public class ProgressFrame extends JFrame {
 	}
 
 	private void configureUrlLable() {
-		urlLable = new JLabel(
-				"http://download.virtualbox.org/virtualbox/4.2.4/VirtualBox-4.2.4-81684-OSX.dmg");
+		urlLable = new JLabel(url);
 		urlLable.setBounds(20, 20, 560, 15);
 		window.add(urlLable);
 	}
@@ -154,7 +143,7 @@ public class ProgressFrame extends JFrame {
 	}
 
 	public void setUrl(String url) {
-		urlLable.setText(url);
+		this.url = url; urlLable.setText(url);
 	}
 
 	public void setStatusTableRowData(String data, int rowNumber,

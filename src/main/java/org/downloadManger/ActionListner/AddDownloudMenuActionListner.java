@@ -2,18 +2,15 @@ package org.downloadManger.ActionListner;
 
 import org.apache.commons.io.FilenameUtils;
 import org.downloadManger.downloader.DownloadFile;
-import org.downloadManger.gui.AddDownloudMenu;
 import org.downloadManger.gui.Home;
 import org.downloadManger.gui.ProgressFrame;
 import org.downloadManger.gui.ProgressFrameNotifier;
-
 import utills.Message;
+import utills.Service;
 import utills.Uiutills;
 
-import javax.naming.Context;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
-
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -53,6 +50,7 @@ public class AddDownloudMenuActionListner implements ActionListener {
 
             fileName = FilenameUtils.getBaseName(actualUrl.getFile());
             extension = FilenameUtils.getExtension(actualUrl.toString());
+
             FileNameExtensionFilter filter;
 
             try {
@@ -69,10 +67,11 @@ public class AddDownloudMenuActionListner implements ActionListener {
 
             if(fileChecker == JFileChooser.APPROVE_OPTION){
                 fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+
                 ProgressFrame progressFrame = new ProgressFrame();
                 ProgressFrameNotifier progressFrameNotifier = new ProgressFrameNotifier(progressFrame);
-                
-                DownloadFile downloadFile = new DownloadFile(progressFrameNotifier,fileChooser.getSelectedFile(), actualUrl,
+                String nameAfterCheck = Service.nameFile(fileChooser.getSelectedFile());
+                DownloadFile downloadFile = new DownloadFile(progressFrameNotifier,new File(nameAfterCheck), actualUrl,
                         Home.tableModel.getRowCount());
                 downloadFile.start();
                 frame.setVisible(false);
