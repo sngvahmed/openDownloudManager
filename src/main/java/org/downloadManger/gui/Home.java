@@ -9,7 +9,6 @@ import java.awt.event.KeyEvent;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
-
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -31,6 +30,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 import org.apache.commons.io.FilenameUtils;
+import org.downloadManger.ActionListner.HomeActionListner;
 import org.downloadManger.downloader.DownloadFile;
 import org.springframework.stereotype.Component;
 
@@ -40,218 +40,169 @@ import utills.Uiutills;
 @Component("Home")
 public class Home extends JFrame {
 
-	private static final long serialVersionUID = 1L;
-	private JPanel window;
-	private JTextField url;
-	private JButton download;
-	public static JTable table;
-	public static DefaultTableModel tableModel;
-    public JFileChooser fileChooser;
-	String[] columnNames = { "File name", "Size", "Status", "Time left",
-			"Transfare rate", "progress", "Downloaded" };
 
-	public Home() {
-		configureMenuBar(this);
-		constructGui();
-		configurFrame();
+    private static final long serialVersionUID = 1L;
+    private JPanel window;
+    private JButton download;
+    private HomeActionListner homeActionListner;
+    public static JTable table;
+    public static DefaultTableModel tableModel;
 
-		download.addActionListener(new ActionListener() {
+    String[] columnNames = { "File name", "Size", "Status", "Time left",
+            "Transfare rate", "progress", "Downloaded" };
 
-			public void actionPerformed(ActionEvent e) {
-				// TODO Auto-generated method stub
-				try {
+    public Home() {
+        configureMenuBar(this);
+        constructGui();
+        configurFrame();
+        homeActionListner = new HomeActionListner(download);
+        download.addActionListener(homeActionListner);
+    }
 
-					
+    private void constructGui() {
+        setTitle("ODM");
 
-					fileChooser = new JFileChooser();
+        window = new JPanel();
+        window.setLayout(null);
 
-					URL actualUrl = new URL(url.getText());
+        download = new JButton("Download");
+        download.setBounds(20, 20, 140, 50);
+        window.add(download);
 
-                    String fileName = FilenameUtils.getBaseName(actualUrl.getFile()) ;
-//                    String extension = FilenameUtils.getExtension(actualUrl.toString());
-//
-//                    FileNameExtensionFilter filter = new FileNameExtensionFilter(extension, extension);
-//
-//                    System.out.println(fileName + " " + extension );
-//
-//                    fileChooser.setFileFilter(filter);
-                    fileChooser.setSelectedFile(new File(fileName));
+        setContentPane(window);
+        constructDownloadList();
 
-                    int fileChecker = fileChooser.showSaveDialog(Home.this);
+    }
 
-                    if(fileChecker == JFileChooser.APPROVE_OPTION){
+    private void constructDownloadList() {
 
-                        fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+        table = new JTable();
+        table.setRowHeight(25);
+        table.setPreferredScrollableViewportSize(new Dimension(500, 70));
+        table.setFillsViewportHeight(true);
+        table.setEnabled(false);
+        // Create the scroll pane and add the table to it.
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setBounds(20, 100, 860, 300);
+        // Add the scroll pane to this panel.
+        window.add(scrollPane);
 
-                        ProgressFrame progressFrame = new ProgressFrame();
-                        ProgressFrameNotifier progressFrameNotifier = new ProgressFrameNotifier(progressFrame);
-                        
-                        DownloadFile downloadFile = new DownloadFile(progressFrameNotifier,fileChooser.getSelectedFile(), actualUrl,
-                                tableModel.getRowCount());
-                        downloadFile.start();
-                    }else {
-                        System.out.println("Fialed to load File");
-                    }
-				} catch (MalformedURLException e1) {
-					Uiutills.showDialog("Invalid url", Message.URL_ERROR,
-							JOptionPane.ERROR_MESSAGE);
-				}
-			}
-		});
+        tableModel = (DefaultTableModel) table.getModel();
 
-	}
+        tableModel.setColumnIdentifiers(columnNames);
 
-	private void constructGui() {
-		setTitle("ODM");
+        centerTableCells();
 
-		window = new JPanel();
-		window.setLayout(null);
+        tableModel.fireTableDataChanged();
 
-		url = new JTextField();
-		url.setBounds(20, 20, 700, 30);
+    }
 
-		download = new JButton("Download");
-		download.setBounds(740, 20, 140, 30);
-		window.add(url);
-		window.add(download);
+    private void centerTableCells() {
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+        for (int i = 0; i < columnNames.length; i++)
+            Home.table.getColumnModel().getColumn(i)
+                    .setCellRenderer(centerRenderer);
+    }
 
-		setContentPane(window);
+    private void configurFrame() {
+        setResizable(false);
+        getContentPane().setBackground(new Color(240, 240, 240));
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(900, 500);
+        setVisible(true);
+        setWindowPosition();
 
-		// list of downloads
+    }
 
-		constructDownloadList();
+    private void setWindowPosition() {
+        Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
+        int width = getWidth();
+        int height = getHeight();
+        int x = (int) ((dimension.getWidth() - width) / 2);
+        int y = (int) ((dimension.getHeight() - height) / 2);
+        setLocation(x, y);
+    }
 
-	}
+    private void configureMenuBar(JFrame frame) {
+        JMenuBar menuBar;
+        JMenu menu, submenu;
+        JMenuItem menuItem;
+        JRadioButtonMenuItem rbMenuItem;
+        JCheckBoxMenuItem cbMenuItem;
 
-	private void constructDownloadList() {
+        // Create the menu bar.
+        menuBar = new JMenuBar();
 
-		table = new JTable();
-		table.setRowHeight(25);
-		table.setPreferredScrollableViewportSize(new Dimension(500, 70));
-		table.setFillsViewportHeight(true);
-		table.setEnabled(false);
-		// Create the scroll pane and add the table to it.
-		JScrollPane scrollPane = new JScrollPane(table);
-		scrollPane.setBounds(20, 100, 860, 300);
-		// Add the scroll pane to this panel.
-		window.add(scrollPane);
+        // Build the first menu.
+        menu = new JMenu("File");
+        menu.setMnemonic(KeyEvent.VK_A);
+        menu.getAccessibleContext().setAccessibleDescription(
+                "The only menu in this program that has menu items");
+        menuBar.add(menu);
 
-		tableModel = (DefaultTableModel) table.getModel();
+        // a group of JMenuItems
+        menuItem = new JMenuItem("A text-only menu item", KeyEvent.VK_T);
+        menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1,
+                ActionEvent.ALT_MASK));
+        menuItem.getAccessibleContext().setAccessibleDescription(
+                "This doesn't really do anything");
+        menu.add(menuItem);
 
-		tableModel.setColumnIdentifiers(columnNames);
+        menuItem = new JMenuItem("Both text and icon", new ImageIcon(
+                "images/middle.gif"));
+        menuItem.setMnemonic(KeyEvent.VK_B);
+        menu.add(menuItem);
 
-		centerTableCells();
+        menuItem = new JMenuItem(new ImageIcon("images/middle.gif"));
+        menuItem.setMnemonic(KeyEvent.VK_D);
+        menu.add(menuItem);
 
-		tableModel.fireTableDataChanged();
+        // a group of radio button menu items
+        menu.addSeparator();
+        ButtonGroup group = new ButtonGroup();
+        rbMenuItem = new JRadioButtonMenuItem("A radio button menu item");
+        rbMenuItem.setSelected(true);
+        rbMenuItem.setMnemonic(KeyEvent.VK_R);
+        group.add(rbMenuItem);
+        menu.add(rbMenuItem);
 
-	}
+        rbMenuItem = new JRadioButtonMenuItem("Another one");
+        rbMenuItem.setMnemonic(KeyEvent.VK_O);
+        group.add(rbMenuItem);
+        menu.add(rbMenuItem);
 
-	private void centerTableCells() {
-		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
-		centerRenderer.setHorizontalAlignment(JLabel.CENTER);
-		for (int i = 0; i < columnNames.length; i++)
-			Home.table.getColumnModel().getColumn(i)
-					.setCellRenderer(centerRenderer);
-	}
+        // a group of check box menu items
+        menu.addSeparator();
+        cbMenuItem = new JCheckBoxMenuItem("A check box menu item");
+        cbMenuItem.setMnemonic(KeyEvent.VK_C);
+        menu.add(cbMenuItem);
 
-	private void configurFrame() {
-		setResizable(false);
-		getContentPane().setBackground(new Color(240, 240, 240));
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setSize(900, 500);
-		setVisible(true);
-		setWindowPosition();
+        cbMenuItem = new JCheckBoxMenuItem("Another one");
+        cbMenuItem.setMnemonic(KeyEvent.VK_H);
+        menu.add(cbMenuItem);
 
-	}
+        // a submenu
+        menu.addSeparator();
+        submenu = new JMenu("A submenu");
+        submenu.setMnemonic(KeyEvent.VK_S);
 
-	private void setWindowPosition() {
-		Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
-		int width = getWidth();
-		int height = getHeight();
-		int x = (int) ((dimension.getWidth() - width) / 2);
-		int y = (int) ((dimension.getHeight() - height) / 2);
-		setLocation(x, y);
-	}
+        menuItem = new JMenuItem("An item in the submenu");
+        menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2,
+                ActionEvent.ALT_MASK));
+        submenu.add(menuItem);
 
-	private void configureMenuBar(JFrame frame) {
-		JMenuBar menuBar;
-		JMenu menu, submenu;
-		JMenuItem menuItem;
-		JRadioButtonMenuItem rbMenuItem;
-		JCheckBoxMenuItem cbMenuItem;
+        menuItem = new JMenuItem("Another item");
+        submenu.add(menuItem);
+        menu.add(submenu);
 
-		// Create the menu bar.
-		menuBar = new JMenuBar();
+        // Build second menu in the menu bar.
+        menu = new JMenu("Edit");
+        menu.setMnemonic(KeyEvent.VK_N);
+        menu.getAccessibleContext().setAccessibleDescription(
+                "This menu does nothing");
+        menuBar.add(menu);
 
-		// Build the first menu.
-		menu = new JMenu("File");
-		menu.setMnemonic(KeyEvent.VK_A);
-		menu.getAccessibleContext().setAccessibleDescription(
-				"The only menu in this program that has menu items");
-		menuBar.add(menu);
-
-		// a group of JMenuItems
-		menuItem = new JMenuItem("A text-only menu item", KeyEvent.VK_T);
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_1,
-				ActionEvent.ALT_MASK));
-		menuItem.getAccessibleContext().setAccessibleDescription(
-				"This doesn't really do anything");
-		menu.add(menuItem);
-
-		menuItem = new JMenuItem("Both text and icon", new ImageIcon(
-				"images/middle.gif"));
-		menuItem.setMnemonic(KeyEvent.VK_B);
-		menu.add(menuItem);
-
-		menuItem = new JMenuItem(new ImageIcon("images/middle.gif"));
-		menuItem.setMnemonic(KeyEvent.VK_D);
-		menu.add(menuItem);
-
-		// a group of radio button menu items
-		menu.addSeparator();
-		ButtonGroup group = new ButtonGroup();
-		rbMenuItem = new JRadioButtonMenuItem("A radio button menu item");
-		rbMenuItem.setSelected(true);
-		rbMenuItem.setMnemonic(KeyEvent.VK_R);
-		group.add(rbMenuItem);
-		menu.add(rbMenuItem);
-
-		rbMenuItem = new JRadioButtonMenuItem("Another one");
-		rbMenuItem.setMnemonic(KeyEvent.VK_O);
-		group.add(rbMenuItem);
-		menu.add(rbMenuItem);
-
-		// a group of check box menu items
-		menu.addSeparator();
-		cbMenuItem = new JCheckBoxMenuItem("A check box menu item");
-		cbMenuItem.setMnemonic(KeyEvent.VK_C);
-		menu.add(cbMenuItem);
-
-		cbMenuItem = new JCheckBoxMenuItem("Another one");
-		cbMenuItem.setMnemonic(KeyEvent.VK_H);
-		menu.add(cbMenuItem);
-
-		// a submenu
-		menu.addSeparator();
-		submenu = new JMenu("A submenu");
-		submenu.setMnemonic(KeyEvent.VK_S);
-
-		menuItem = new JMenuItem("An item in the submenu");
-		menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_2,
-				ActionEvent.ALT_MASK));
-		submenu.add(menuItem);
-
-		menuItem = new JMenuItem("Another item");
-		submenu.add(menuItem);
-		menu.add(submenu);
-
-		// Build second menu in the menu bar.
-		menu = new JMenu("Edit");
-		menu.setMnemonic(KeyEvent.VK_N);
-		menu.getAccessibleContext().setAccessibleDescription(
-				"This menu does nothing");
-		menuBar.add(menu);
-
-		frame.setJMenuBar(menuBar);
-	}
+        frame.setJMenuBar(menuBar);
+    }
 }
