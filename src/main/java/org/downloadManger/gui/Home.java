@@ -1,41 +1,29 @@
 package org.downloadManger.gui;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
-import java.io.File;
-import java.net.MalformedURLException;
-import java.net.URL;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JRadioButtonMenuItem;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
-import org.apache.commons.io.FilenameUtils;
 import org.downloadManger.ActionListner.HomeActionListner;
-import org.downloadManger.downloader.DownloadFile;
 import org.springframework.stereotype.Component;
 
-import utills.Message;
-import utills.Uiutills;
+import utills.Image;
 
 @Component("Home")
 public class Home extends JFrame {
@@ -47,14 +35,16 @@ public class Home extends JFrame {
     private HomeActionListner homeActionListner;
     public static JTable table;
     public static DefaultTableModel tableModel;
+    private ImageIcon iconBackground , iconButton;
 
     String[] columnNames = { "File name", "Size", "Status", "Time left",
             "Transfare rate", "progress", "Downloaded" };
 
     public Home() {
         configureMenuBar(this);
-        constructGui();
-        configurFrame();
+        constructGui(); // GUI Button & Jlabel
+        configurFrame(); // Frame Resizing
+        constructDownloadList(); // Table initlization
         homeActionListner = new HomeActionListner(download);
         download.addActionListener(homeActionListner);
     }
@@ -62,16 +52,14 @@ public class Home extends JFrame {
     private void constructGui() {
         setTitle("ODM");
 
-        window = new JPanel();
-        window.setLayout(null);
+        // jlabel initilazer
+        WindowsLabelInit();
 
-        download = new JButton("Download");
-        download.setBounds(20, 20, 140, 50);
+        // downloud button initalizer
+        DownloudButtonInit();
+
         window.add(download);
-
         setContentPane(window);
-        constructDownloadList();
-
     }
 
     private void constructDownloadList() {
@@ -94,7 +82,6 @@ public class Home extends JFrame {
         centerTableCells();
 
         tableModel.fireTableDataChanged();
-
     }
 
     private void centerTableCells() {
@@ -124,6 +111,26 @@ public class Home extends JFrame {
         setLocation(x, y);
     }
 
+    private void DownloudButtonInit() {
+        download = new JButton();
+        iconButton = new ImageIcon(Image.HOME_DOWNLOUD);
+        download.setIcon(iconButton);
+        download.setBounds(20, 20, 140, 50);
+
+    }
+
+    private void WindowsLabelInit() {
+        iconBackground = new ImageIcon(Image.BACKGROUND);
+        window = new JPanel(){
+            public void paintComponent(Graphics g) {
+                g.drawImage(iconBackground.getImage(), 0, 0, null);
+                super.paintComponent(g);
+            }
+        };
+        window.setOpaque(false);
+        window.setLayout(null);
+    }
+
     private void configureMenuBar(JFrame frame) {
         JMenuBar menuBar;
         JMenu menu, submenu;
@@ -149,7 +156,7 @@ public class Home extends JFrame {
                 "This doesn't really do anything");
         menu.add(menuItem);
 
-        menuItem = new JMenuItem("Both text and icon", new ImageIcon(
+        menuItem = new JMenuItem("Both text and iconBackground", new ImageIcon(
                 "images/middle.gif"));
         menuItem.setMnemonic(KeyEvent.VK_B);
         menu.add(menuItem);

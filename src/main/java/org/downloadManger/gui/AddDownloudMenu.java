@@ -3,8 +3,8 @@ package org.downloadManger.gui;
 import org.apache.commons.io.FilenameUtils;
 import org.downloadManger.ActionListner.AddDownloudMenuActionListner;
 import org.downloadManger.downloader.DownloadFile;
-import utills.Message;
-import utills.Uiutills;
+import utills.*;
+import utills.Image;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -24,18 +24,17 @@ public class AddDownloudMenu extends JFrame{
     private JTextField url;
     private JButton download;
     private AddDownloudMenuActionListner addDownloudListner;
+    private ImageIcon iconBackground , iconButton;
 
     public AddDownloudMenu(){
         setTitle("Downloud Info");
 
-        window = new JPanel();
-        window.setLayout(null);
+        WindowsLabelInit();
 
         url = new JTextField();
         url.setBounds(20,20,700,30);
 
-        download = new JButton("Download");
-        download.setBounds(300,70,120,30);
+        DownloudButtonInit();
 
         window.add(url);
         window.add(download);
@@ -44,6 +43,27 @@ public class AddDownloudMenu extends JFrame{
         configurFrame();
         ListnerHandler();
     }
+
+    private void DownloudButtonInit() {
+        download = new JButton();
+        iconButton = new ImageIcon(Image.HOME_DOWNLOUD);
+        download.setIcon(iconButton);
+        download.setBounds(300,70,120,30);
+
+    }
+
+    private void WindowsLabelInit() {
+        iconBackground = new ImageIcon(utills.Image.BACKGROUND);
+        window = new JPanel(){
+            public void paintComponent(Graphics g) {
+                g.drawImage(iconBackground.getImage(), 0, 0, null);
+                super.paintComponent(g);
+            }
+        };
+        window.setOpaque(false);
+        window.setLayout(null);
+    }
+
 
     public void ListnerHandler(){
 
